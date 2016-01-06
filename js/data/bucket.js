@@ -4,6 +4,7 @@ var featureFilter = require('feature-filter');
 
 var StyleDeclarationSet = require('../style/style_declaration_set');
 var LayoutProperties = require('../style/layout_properties');
+var PaintProperties = require('../style/paint_properties');
 var ElementGroups = require('./element_groups');
 var Buffer = require('./buffer');
 
@@ -63,6 +64,7 @@ function Bucket(options) {
     this.filter = featureFilter(this.layer.filter);
 
     this.layoutProperties = createLayoutProperties(this.layer, this.zoom);
+    this.paintProperties = createPaintProperties(this.layer, this.zoom);
 
     if (options.elementGroups) {
         this.elementGroups = options.elementGroups;
@@ -201,6 +203,18 @@ function createLayoutProperties(layer, zoom) {
     }
 
     return new LayoutProperties[layer.type](layout);
+}
+
+function createPaintProperties(layer, zoom) {
+    var fakeZoomHistory = { lastIntegerZoom: Infinity, lastIntegerZoomTime: 0, lastZoom: 0 };
+    var declarations = new StyleDeclarationSet('paint', layer.type, layer.paint).values();
+    var paintProperties = new PaintProperties[layer.type]();
+
+    for (var k in declarations) {
+        paintProperties[k] = declarations[k].calculate(zoom, fakeZoomHistory);
+    }
+
+    return paintProperties;
 }
 
 var createVertexAddMethodCache = {};
