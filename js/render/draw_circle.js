@@ -25,9 +25,6 @@ function drawCircles(painter, source, layer, coords) {
     // are inversely related.
     var antialias = 1 / browser.devicePixelRatio / layer.paint['circle-radius'];
 
-    gl.disableVertexAttribArray(shader.a_color);
-    gl.vertexAttrib4fv(shader.a_color, layer.paint['circle-color'].map(function(v) { return v * 255; }));
-
     gl.disableVertexAttribArray(shader.a_blur);
     gl.vertexAttrib1f(shader.a_blur, Math.max(layer.paint['circle-blur'], antialias) * 255);
 

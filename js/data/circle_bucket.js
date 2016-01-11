@@ -25,7 +25,7 @@ CircleBucket.prototype.shaders = {
         vertexBuffer: true,
         elementBuffer: true,
 
-        attributeArgs: ['x', 'y', 'extrudeX', 'extrudeY'],
+        attributeArgs: ['x', 'y', 'extrudeX', 'extrudeY', 'paint'],
 
         attributes: [{
             name: 'pos',
@@ -34,6 +34,16 @@ CircleBucket.prototype.shaders = {
             value: [
                 '(x * 2) + ((extrudeX + 1) / 2)',
                 '(y * 2) + ((extrudeY + 1) / 2)'
+            ]
+        }, {
+            name: 'color',
+            components: 4,
+            type: Bucket.AttributeType.UNSIGNED_BYTE,
+            value: [
+                'paint["circle-color"][0] * 255',
+                'paint["circle-color"][1] * 255',
+                'paint["circle-color"][2] * 255',
+                'paint["circle-color"][3] * 255'
             ]
         }]
     }
@@ -60,10 +70,10 @@ CircleBucket.prototype.addFeature = function(feature) {
         // │ 0     1 │
         // └─────────┘
 
-        var index = this.addCircleVertex(x, y, -1, -1) - group.vertexStartIndex;
-        this.addCircleVertex(x, y, 1, -1);
-        this.addCircleVertex(x, y, 1, 1);
-        this.addCircleVertex(x, y, -1, 1);
+        var index = this.addCircleVertex(x, y, -1, -1, this.paintProperties) - group.vertexStartIndex;
+        this.addCircleVertex(x, y, 1, -1, this.paintProperties);
+        this.addCircleVertex(x, y, 1, 1, this.paintProperties);
+        this.addCircleVertex(x, y, -1, 1, this.paintProperties);
         group.vertexLength += 4;
 
         this.addCircleElement(index, index + 1, index + 2);
