@@ -39,12 +39,8 @@ CircleBucket.prototype.shaders = {
             name: 'color',
             components: 4,
             type: Bucket.AttributeType.UNSIGNED_BYTE,
-            value: [
-                'paint["circle-color"][0] * 255',
-                'paint["circle-color"][1] * 255',
-                'paint["circle-color"][2] * 255',
-                'paint["circle-color"][3] * 255'
-            ]
+            value: 'paint["circle-color"]',
+            multiplier: 255
         }]
     }
 };
