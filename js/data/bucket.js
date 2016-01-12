@@ -64,7 +64,12 @@ function Bucket(options) {
 
     this.layoutProperties = createLayoutProperties(this.layer, this.zoom);
 
-    this.resetBuffers(options.buffers);
+    if (options.elementGroups) {
+        this.elementGroups = options.elementGroups;
+        this.buffers = options.buffers;
+    } else {
+        this.resetBuffers(options.buffers);
+    }
 
     for (var shaderName in this.shaders) {
         var shader = this.shaders[shaderName];
@@ -161,6 +166,14 @@ Bucket.prototype.getAddMethodName = function(shaderName, type) {
  */
 Bucket.prototype.getBufferName = function(shaderName, type) {
     return shaderName + capitalize(type);
+};
+
+Bucket.prototype.serialize = function() {
+    return {
+        layer: this.layer,
+        zoom: this.zoom,
+        elementGroups: this.elementGroups
+    };
 };
 
 function createLayoutProperties(layer, zoom) {

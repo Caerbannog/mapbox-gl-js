@@ -2,6 +2,7 @@
 
 var util = require('../util/util');
 var Buffer = require('../data/buffer');
+var Bucket = require('../data/bucket');
 
 module.exports = Tile;
 
@@ -20,6 +21,7 @@ function Tile(coord, size, sourceMaxZoom) {
     this.uses = 0;
     this.tileSize = size;
     this.sourceMaxZoom = sourceMaxZoom;
+    this.buckets = {};
 }
 
 Tile.prototype = {
@@ -58,6 +60,7 @@ Tile.prototype = {
 
         this.buffers = unserializeBuffers(data.buffers);
         this.elementGroups = data.elementGroups;
+        this.buckets = unserializeBuckets(data.buckets, this.buffers);
         this.tileExtent = data.extent;
     },
 
@@ -70,7 +73,6 @@ Tile.prototype = {
      * @private
      */
     reloadSymbolData: function(data, painter) {
-
         if (!this.buffers) {
             // the tile has been destroyed
             return;
@@ -82,16 +84,9 @@ Tile.prototype = {
         if (this.buffers.iconElement) this.buffers.iconElement.destroy(painter.gl);
         if (this.buffers.collisionBoxVertex) this.buffers.collisionBoxVertex.destroy(painter.gl);
 
-        var buffers = unserializeBuffers(data.buffers);
-        this.buffers.glyphVertex = buffers.glyphVertex;
-        this.buffers.glyphElement = buffers.glyphElement;
-        this.buffers.iconVertex = buffers.iconVertex;
-        this.buffers.iconElement = buffers.iconElement;
-        this.buffers.collisionBoxVertex = buffers.collisionBoxVertex;
-
-        for (var id in data.elementGroups) {
-            this.elementGroups[id] = data.elementGroups[id];
-        }
+        util.extend(this.buffers, unserializeBuffers(data.buffers));
+        util.extend(this.elementGroups, data.elementGroups);
+        util.extend(this.buckets, unserializeBuckets(data.buckets, this.buffers));
     },
 
     /**
@@ -151,6 +146,15 @@ function unserializeBuffers(input) {
     var output = {};
     for (var k in input) {
         output[k] = new Buffer(input[k]);
+    }
+    return output;
+}
+
+function unserializeBuckets(input, buffers) {
+    var output = {};
+    for (var i = 0; i < input.length; i++) {
+        var bucket = new Bucket(util.extend(input[i], {buffers: buffers}));
+        output[bucket.id] = bucket;
     }
     return output;
 }

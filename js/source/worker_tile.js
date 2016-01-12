@@ -196,6 +196,7 @@ WorkerTile.prototype.parse = function(data, layers, actor, callback) {
             elementGroups: getElementGroups(buckets),
             buffers: buffers,
             extent: extent,
+            buckets: buckets.map(function(bucket) { return bucket.serialize(); }),
             bucketStats: stats
         }, getTransferables(buffers));
     }
@@ -216,8 +217,10 @@ WorkerTile.prototype.redoPlacement = function(angle, pitch, collisionDebug) {
         this.symbolBuckets[i].placeFeatures(collisionTile, buffers, collisionDebug);
     }
 
+    // TODO move the results formatting out into Worker
     return {
         result: {
+            buckets: this.symbolBuckets.map(function(bucket) { return bucket.serialize(); }),
             elementGroups: getElementGroups(this.symbolBuckets),
             buffers: buffers
         },
