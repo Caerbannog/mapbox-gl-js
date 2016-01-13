@@ -34,9 +34,10 @@ function drawCircles(painter, source, layer, coords) {
 
         var tile = source.getTile(coord);
         if (!tile.buffers) continue;
-        if (!tile.elementGroups[layer.ref || layer.id].circle) continue;
+        var groups = tile.elementGroups[layer.ref || layer.id];
+        if (!groups || !groups.circle) continue;
 
-        var elementGroups = tile.elementGroups[layer.ref || layer.id].circle;
+        var elementGroups = groups.circle;
         var vertex = tile.buffers.circleVertex;
         var elements = tile.buffers.circleElement;
 
