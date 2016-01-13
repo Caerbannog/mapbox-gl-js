@@ -6,6 +6,7 @@ var util = require('../util/util');
 var ajax = require('../util/ajax');
 var vt = require('vector-tile');
 var Protobuf = require('pbf');
+var supercluster = require('supercluster');
 
 var geojsonvt = require('geojson-vt');
 var GeoJSONWrapper = require('./geojson_wrapper');
@@ -105,7 +106,16 @@ util.extend(Worker.prototype, {
                 return callback(new Error("Input data is not a valid GeoJSON object."));
             }
             try {
-                this.geoJSONIndexes[params.source] = geojsonvt(data, params.geojsonVtOptions);
+                if (params.cluster) {
+                    this.geoJSONIndexes[params.source] = supercluster({
+                        extent: 4096,
+                        radius: 400,
+                        log: false,
+                        maxZoom: 18
+                    }).load(data.features);
+                } else {
+                    this.geoJSONIndexes[params.source] = geojsonvt(data, params.geojsonVtOptions);
+                }
             } catch (err) {
                 return callback(err);
             }

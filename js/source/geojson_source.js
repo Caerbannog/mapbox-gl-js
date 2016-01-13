@@ -46,6 +46,8 @@ function GeoJSONSource(options) {
     if (options.buffer !== undefined) this.geojsonVtOptions.buffer = options.buffer;
     if (options.tolerance !== undefined) this.geojsonVtOptions.tolerance = options.tolerance;
 
+    this.cluster = options.cluster || false;
+
     this._pyramid = new TilePyramid({
         tileSize: 512,
         minzoom: this.minzoom,
@@ -124,7 +126,8 @@ GeoJSONSource.prototype = util.inherit(Evented, /** @lends GeoJSONSource.prototy
             data: data,
             tileSize: 512,
             source: this.id,
-            geojsonVtOptions: this.geojsonVtOptions
+            geojsonVtOptions: this.geojsonVtOptions,
+            cluster: this.cluster
         }, function(err) {
             this._loaded = true;
             if (err) {

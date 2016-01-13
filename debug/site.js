@@ -14,45 +14,72 @@ map.addControl(new mapboxgl.Navigation());
 map.on('style.load', function() {
     map.addSource('geojson', {
         "type": "geojson",
-        "data": "/debug/route.json"
+        "data": "/debug/trees-na.json",
+        "maxzoom": 19,
+        cluster: true
     });
 
     map.addLayer({
-        "id": "route",
-        "type": "line",
+        "id": "tree_single",
+        "type": "circle",
         "source": "geojson",
+        "filter": ['!=', 'cluster', true],
         "paint": {
-            "line-color": "#EC8D8D",
-            "line-width": {
-                "base": 1.5,
-                "stops": [
-                    [
-                        5,
-                        0.75
-                    ],
-                    [
-                        18,
-                        32
-                    ]
-                ]
-            }
+            "circle-color": "rgba(0, 200, 0, 0.8)",
+            "circle-radius": "10"
         }
     }, 'country-label-lg');
 
-    map.addSource('geojson-random-points', {
-        "type": "geojson",
-        "data": "/debug/random.geojson"
-    });
+    map.addLayer({
+        "id": "tree_cluster_big",
+        "type": "circle",
+        "source": "geojson",
+        "filter": ['all', ['==', 'cluster', true], ['>=', 'numPoints', 10000]],
+        "paint": {
+            "circle-color": "rgba(255, 100, 100, 0.8)",
+            "circle-radius": "20"
+        }
+    }, 'country-label-lg');
 
     map.addLayer({
-        "id": "random-points",
+        "id": "tree_cluster_average",
         "type": "circle",
-        "source": "geojson-random-points",
+        "source": "geojson",
+        "filter": ['all', ['==', 'cluster', true], ['>=', 'numPoints', 1000], ['<', 'numPoints', 10000]],
         "paint": {
-            "circle-radius": 5,
-            "circle-color": "#f0f"
+            "circle-color": "rgba(240, 200, 0, 0.8)",
+            "circle-radius": "20"
         }
-    });
+    }, 'country-label-lg');
+
+    map.addLayer({
+        "id": "tree_cluster_small",
+        "type": "circle",
+        "source": "geojson",
+        "filter": ['all', ['==', 'cluster', true], ['<', 'numPoints', 1000]],
+        "paint": {
+            "circle-color": "rgba(0, 200, 0, 0.8)",
+            "circle-radius": "20"
+        }
+    }, 'country-label-lg');
+
+    map.addLayer({
+        "id": "tree_label",
+        "type": "symbol",
+        "source": "geojson",
+        "filter": ['==', 'cluster', true],
+        "layout": {
+            "text-field": "{numPointsH}",
+            "text-font": [
+                "Open Sans Semibold",
+                "Arial Unicode MS Bold"
+            ],
+            "text-size": 12
+        },
+        "paint": {
+            "text-color": "black"
+        }
+    }, 'country-label-lg');
 
     var bufferTimes = {};
     map.on('tile.stats', function(bufferTimes) {
