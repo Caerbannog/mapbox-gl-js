@@ -153,7 +153,7 @@ function unserializeBuffers(input) {
 function unserializeBuckets(input, buffers) {
     var output = {};
     for (var i = 0; i < input.length; i++) {
-        var bucket = new Bucket(util.extend(input[i], {buffers: buffers}));
+        var bucket = Bucket.create(util.extend(input[i], {buffers: buffers}));
         output[bucket.id] = bucket;
     }
     return output;

@@ -26,10 +26,10 @@ function drawCircles(painter, source, layer, coords) {
     var antialias = 1 / browser.devicePixelRatio / layer.paint['circle-radius'];
 
     gl.disableVertexAttribArray(shader.a_blur);
-    gl.vertexAttrib1f(shader.a_blur, Math.max(layer.paint['circle-blur'], antialias) * 255);
+    gl.vertexAttrib1f(shader.a_blur, Math.max(layer.paint['circle-blur'], antialias));
 
     gl.disableVertexAttribArray(shader.a_size);
-    gl.vertexAttrib1f(shader.a_size, layer.paint['circle-radius'] * 255);
+    gl.vertexAttrib1f(shader.a_size, layer.paint['circle-radius']);
 
     for (var i = 0; i < coords.length; i++) {
         var coord = coords[i];
@@ -39,6 +39,7 @@ function drawCircles(painter, source, layer, coords) {
         if (!tile.elementGroups[layer.ref || layer.id].circle) continue;
 
         var elementGroups = tile.elementGroups[layer.ref || layer.id].circle;
+        var bucket = tile.buckets[layer.ref || layer.id];
         var vertex = tile.buffers.circleVertex;
         var elements = tile.buffers.circleElement;
 
@@ -55,7 +56,7 @@ function drawCircles(painter, source, layer, coords) {
             var offset = group.vertexStartIndex * vertex.itemSize;
 
             vertex.bind(gl);
-            vertex.setAttribPointers(gl, shader, offset);
+            bucket.setAttribPointers('circle', gl, shader, offset, [{$zoom: painter.transform.zoom}]);
 
             elements.bind(gl);
 

@@ -1,36 +1,7 @@
 'use strict';
 
-var parseCSSColor = require('csscolorparser').parseCSSColor;
-var createGLFunction = require('mapbox-gl-function');
-var util = require('../util/util');
-
-function createBackwardsCompatibleGLFunction(reference, parameters) {
-    if (parameters.stops) {
-        var domain = [];
-        var range = [];
-
-        for (var i = 0; i < parameters.stops.length; i++) {
-            domain.push(parameters.stops[i][0]);
-            range.push(parameters.stops[i][1]);
-        }
-
-        parameters.domain = domain;
-        parameters.range = range;
-        delete parameters.stops;
-
-        if (reference.function === 'interpolated') {
-            parameters.type = 'exponential';
-        } else {
-            parameters.domain.shift();
-            parameters.type = 'interval';
-        }
-    }
-
-    var fun = createGLFunction(parameters);
-    return function(zoom) {
-        return fun({$zoom: zoom});
-    };
-}
+var StyleFunction = require('./style_function');
+var parseColor = require('./parse_color');
 
 module.exports = StyleDeclaration;
 
@@ -51,7 +22,7 @@ function StyleDeclaration(reference, value) {
         this.value = value;
     }
 
-    this.calculate = createBackwardsCompatibleGLFunction(reference, this.value);
+    this.calculate = StyleFunction.createBackwardsCompatible(reference, this.value);
 
     if (reference.function !== 'interpolated' && reference.transition) {
         this.calculate = transitioned(this.calculate);
@@ -86,39 +57,4 @@ function transitioned(calculate) {
             t: mix
         };
     };
-}
-
-var colorCache = {};
-
-function parseColor(input) {
-
-    if (colorCache[input]) {
-        return colorCache[input];
-
-    // RGBA array
-    } else if (Array.isArray(input)) {
-        return input;
-
-    // GL function
-    } else if (input && input.stops) {
-        return util.extend({}, input, {
-            stops: input.stops.map(function(step) {
-                return [step[0], parseColor(step[1])];
-            })
-        });
-
-    // Color string
-    } else if (typeof input === 'string') {
-        var output = colorDowngrade(parseCSSColor(input));
-        colorCache[input] = output;
-        return output;
-
-    } else {
-        throw new Error('Invalid color ' + input);
-    }
-
-}
-
-function colorDowngrade(color) {
-    return [color[0] / 255, color[1] / 255, color[2] / 255, color[3] / 1];
 }
